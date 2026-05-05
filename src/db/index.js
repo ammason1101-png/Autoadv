@@ -3,17 +3,15 @@ const { Pool } = pg;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
+  ssl: process.env.DATABASE_URL?.includes('localhost')
+    ? false
+    : { rejectUnauthorized: false }
 });
 
-export async function query(text, params) {
-  const client = await pool.connect();
-  try {
-    const res = await client.query(text, params);
-    return res;
-  } finally {
-    client.release();
-  }
-}
+export const query = (text, params) => pool.query(text, params);
+
+pool.on('error', (err) => {
+  console.error('❌ Unexpected PostgreSQL error:', err);
+});
 
 export default pool;
