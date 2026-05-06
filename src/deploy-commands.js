@@ -1,4 +1,5 @@
 import { REST, Routes } from 'discord.js';
+import dotenv from 'dotenv';
 
 import * as redeemKey from './commands/redeem_key.js';
 import * as help from './commands/help.js';
@@ -28,6 +29,8 @@ import * as trialDrop from './commands/trial_drop.js';
 import * as adminGenkey from './commands/admin_genkey.js';
 import * as adminReseller from './commands/admin_reseller.js';
 
+dotenv.config();
+
 const commands = [
   redeemKey, help, setup, configpanel, oauthLink,
   settoken, listtokens, selecttoken, removetoken,
@@ -40,22 +43,27 @@ const commands = [
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.DISCORD_CLIENT_ID;
 
+// 🔴 PUT YOUR SERVER ID HERE
+const guildId = "1501200526119932046";
+
 if (!token || !clientId) {
-  console.error('❌ Missing DISCORD_TOKEN or DISCORD_CLIENT_ID environment variables.');
+  console.error("❌ Missing DISCORD_TOKEN or DISCORD_CLIENT_ID");
   process.exit(1);
 }
 
-const rest = new REST().setToken(token);
+const rest = new REST({ version: '10' }).setToken(token);
 
 (async () => {
   try {
-    console.log(`🔄 Deploying ${commands.length} slash commands...`);
-    const data = await rest.put(
-      Routes.applicationCommands(clientId),
+    console.log(`🔄 Deploying ${commands.length} commands...`);
+
+    await rest.put(
+      Routes.applicationGuildCommands(clientId, guildId),
       { body: commands }
     );
-    console.log(`✅ Successfully deployed ${data.length} slash commands globally.`);
+
+    console.log("✅ Commands deployed successfully!");
   } catch (err) {
-    console.error('❌ Failed to deploy commands:', err);
+    console.error("❌ Deploy failed:", err);
   }
 })();
